@@ -139,6 +139,8 @@ StarRocks 各版本（包名为 StarRocks-xx 的版本）之间都是支持回�
 
 * 大版本回滚（例 2.x.x 回滚至 2.0.x），则需要替换 FE、BE 的 bin 和 lib 文件夹。
 
+* 2.1.x 回滚至 2.0.x及以前版本需要关闭pipeline，`set global enable_pipeline_engine = false`。
+
 ### 回滚
 
 * 确认文件替换完成。
