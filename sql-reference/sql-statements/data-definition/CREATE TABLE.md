@@ -436,7 +436,7 @@ DISTRIBUTED BY HASH (k1, k2) BUCKETS 32
 PROPERTIES(
     "storage_type" = "column",
     "storage_medium" = "SSD",
-    "storage_cooldown_time" = "2015-06-04 00: 00: 00"
+    "storage_cooldown_time" = "2015-06-04 00:00:00"
 );
 ```
 
@@ -456,7 +456,7 @@ DISTRIBUTED BY HASH (k1, k2) BUCKETS 32
 PROPERTIES(
     "storage_type" = "column",
     "storage_medium" = "SSD",
-    "storage_cooldown_time" = "2015-06-04 00: 00: 00"
+    "storage_cooldown_time" = "2015-06-04 00:00:00"
 );
 ```
 
@@ -473,7 +473,7 @@ CREATE TABLE example_db.table_range
     k2 INT,
     k3 SMALLINT,
     v1 VARCHAR(2048),
-    v2 DATETIME DEFAULT "2014-02-04 15: 36: 00"
+    v2 DATETIME DEFAULT "2014-02-04 15:36:00"
 )
 ENGINE = olap
 DUPLICATE KEY(k1, k2, k3)
@@ -485,7 +485,7 @@ PARTITION BY RANGE (k1)
 )
 DISTRIBUTED BY HASH(k2) BUCKETS 32
 PROPERTIES(
-    "storage_medium" = "SSD", "storage_cooldown_time" = "2015-06-04 00: 00: 00"
+    "storage_medium" = "SSD", "storage_cooldown_time" = "2015-06-04 00:00:00"
 );
 ```
 
@@ -723,6 +723,6 @@ PROPERTIES
 );
 ```
 
-## 关键字(keywords)
+## 关键字
 
 CREATE, TABLE
