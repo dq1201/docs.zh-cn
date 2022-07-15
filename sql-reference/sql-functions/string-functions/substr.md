@@ -1,4 +1,4 @@
-# substr, sunstring
+# substr, substring
 
 ## 功能
 
@@ -43,7 +43,3 @@ mysql> select substring("starrocks",-2);
 +----------------------------+
 1 row in set (0.00 sec)
 ```
-
-## 关键词
-
-SUBSTR，SUBSTRING

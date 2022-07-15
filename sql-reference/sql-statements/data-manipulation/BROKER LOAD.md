@@ -2,17 +2,16 @@
 
 ## 功能
 
-Broker Load 通过随 StarRocks 集群一同部署的 broker 进行，访问对应数据源的数据，进行数据导入。该导入方式使用的场景详见 [broker laod](/loading/BrokerLoad.md) 章节。
+Broker Load 通过随 StarRocks 集群一同部署的 broker 进行，访问对应数据源的数据，进行数据导入。该导入方式使用的场景详见 [Broker load](/loading/BrokerLoad.md) 章节。
 
 可以通过 `show broker` 命令查看已经部署的 broker。
 
-目前支持以下 5 种数据源：
+目前支持以下 4 种数据源：
 
-1. Apache HDFS：社区版本 hdfs。
+1. HDFS：社区版本 hdfs。
 2. Amazon S3：Amazon 对象存储。
 3. 阿里云 OSS：阿里云对象存储。
-4. 腾讯 COS：腾讯云对象存储。
-5. 百度 BOS：百度对象存储。
+4. 腾讯COS：腾讯云对象存储。
 
 ## 语法
 
@@ -117,20 +116,23 @@ WITH BROKER broker_name
 
     用于提供通过 broker 访问数据源的信息。不同的 broker，以及不同的访问方式，需要提供的信息不同。
 
-    1. Apache HDFS
+    1. HDFS
 
         社区版本的 hdfs，支持简单认证、kerberos 认证。以及支持 HA 配置。
 
         简单认证：
 
+        ```plain text
         hadoop.security.authentication = simple (默认)
 
         username：hdfs 用户名
 
-        password：hdfs 密码
+        password：hdfs 密码  
+        ```
 
         kerberos 认证：
 
+        ```plain text
         hadoop.security.authentication = kerberos
 
         kerberos_principal：指定 kerberos 的 principal
@@ -138,9 +140,11 @@ WITH BROKER broker_name
         kerberos_keytab：指定 kerberos 的 keytab 文件路径。该文件必须为 broker 进程所在服务器上的文件。
 
         kerberos_keytab_content：指定 kerberos 中 keytab 文件内容经过 base64 编码之后的内容。这个跟 kerberos_keytab 配置二选一就可以。
+        ```
 
         namenode HA：
 
+        ```plain text
         通过配置 namenode HA，可以在 namenode 切换时，自动识别到新的 namenode
 
         dfs.nameservices: 指定 hdfs 服务的名字，自定义，如："dfs.nameservices" = "my_ha"
@@ -150,6 +154,7 @@ WITH BROKER broker_name
         dfs.namenode.rpc-address.xxx.nn：指定 namenode 的 rpc 地址信息。其中 nn 表示 dfs.ha.namenodes.xxx 中配置的 namenode 的名字，如："dfs.namenode.rpc-address.my_ha.my_nn" = "host: port"
 
         dfs.client.failover.proxy.provider：指定 client 连接 namenode 的 provider，默认为：org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider
+        ```
 
     2. Amazon S3
 
@@ -169,16 +174,7 @@ WITH BROKER broker_name
 
         fs.oss.endpoint：Aliyun OSS 的 endpoint
 
-    4. 百度 BOS
-
-       需提供：
-       bos_endpoint：BOS 的 endpoint
-
-       bos_accesskey：公有云用户的 accesskey
-
-       bos_secret_accesskey：公有云用户的 secret_accesskey
-
-    5. opt_properties
+    4. opt_properties
 
         用于指定一些特殊参数。
 
@@ -197,7 +193,7 @@ WITH BROKER broker_name
 
         timezone:         指定某些受时区影响的函数的时区，如 strftime/alignment_timestamp/from_unixtime 等等，具体请查阅 [时区](/using_starrocks/timezone.md) 文档。如果不指定，则使用 "Asia/Shanghai" 时区。
 
-    6. 导入数据格式样例
+    5. 导入数据格式样例
 
         整型类（TINYINT/SMALLINT/INT/BIGINT/LARGEINT）：1, 1000, 1234
 
@@ -302,46 +298,6 @@ WITH BROKER my_hdfs_broker
 )
 ```
 
-### 从 BOS 导入数据并对列进行转化
-
-从 BOS 导入一批数据，指定分区, 并对导入文件的列做一些转化，如下：
-
-表结构为：
-k1 varchar(20)
-k2 int
-
-假设数据文件只有一行数据：
-
-Adele,1,1
-
-数据文件中各列，对应导入语句中指定的各列：
-k1, tmp_k2, tmp_k3
-
-转换如下：
-
-1. k1: 不变换
-2. k2：是 tmp_k2 和 tmp_k3 数据之和
-
-```sql
-LOAD LABEL example_db.label6
-(
-DATA INFILE("bos://my_bucket/input/file")
-INTO TABLE `my_table`
-PARTITION (p1, p2)
-COLUMNS TERMINATED BY ","
-(k1, tmp_k2, tmp_k3)
-SET (
-k2 = tmp_k2 + tmp_k3
-)
-)
-WITH BROKER my_bos_broker
-(
-    "bos_endpoint" = "http://bj.bcebos.com",
-    "bos_accesskey" = "xxxxxxxxxxxxxxxxxxxxxxxxxx",
-    "bos_secret_accesskey"="yyyyyyyyyyyyyyyyyyyy"
-)
-```
-
 ### 导入 HLL 列数据
 
 导入数据到含有 HLL 列的表，可以是表中的列或者数据里面的列
@@ -398,7 +354,7 @@ WITH BROKER hdfs ("username"="hdfs_user", "password"="hdfs_password");
 
 ### 提取文件路径中的分区字段
 
-如果需要，则会根据表中定义的字段类型解析文件路径中的分区字段（partitioned fields），类似 Spark 中 Partition Discovery 的功能
+如果用户需要，则可以根据表中定义的字段类型来解析文件路径中的分区字段（partitioned fields），该功能类似Spark中Partition Discovery的功能
 
 ```SQL
 LOAD LABEL example_db.label10
@@ -462,7 +418,7 @@ SET (data_time=str_to_date(data_time, '%Y-%m-%d %H%%3A%i%%3A%s'))
 WITH BROKER "hdfs" ("username"="user", "password"="pass");
 ```
 
-### 从阿里云 OSS 导入 csv 格式的数据
+### 从阿里云 OSS 导入 CSV 格式的数据
 
 ```SQL
 LOAD LABEL example_db.label12
@@ -479,7 +435,7 @@ WITH BROKER my_broker
 )
 ```
 
-### 从腾讯云 COS 导入 csv 格式的数据
+### 从腾讯云 COS 导入 CSV 格式的数据
 
 ```SQL
 LOAD LABEL example_db.label13
@@ -496,7 +452,7 @@ WITH BROKER my_broker
 )
 ```
 
-### 从 Amazon S3 导入 csv 格式的数据
+### 从 Amazon S3 导入 CSV 格式的数据
 
 ```SQL
 LOAD LABEL example_db.label14
@@ -512,7 +468,3 @@ WITH BROKER my_broker
     "fs.s3a.endpoint" = "s3-ap-northeast-1.amazonaws.com"
 )
 ```
-
-## 关键字(keywords)
-
-BROKER, LOAD
